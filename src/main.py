@@ -14,3 +14,4 @@ with daemon.DaemonContext(stdout=out) as d:
         print(str(ex))
         print(traceback.format_exc())
         d.terminate()
+ 
