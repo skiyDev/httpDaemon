@@ -2,7 +2,11 @@ import file_util as fu
 import traceback
 from aiohttp import web
 
+
 class Handler:
+    """
+    Http handler
+    """
     def __init__(self):
         pass
 
