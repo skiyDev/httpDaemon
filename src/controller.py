@@ -10,17 +10,6 @@ class Handler:
     def __init__(self):
         pass
 
-    async def handle(self, request):
-        try:
-            name = request.match_info.get('name', "Anonymous")
-            text = "Hello, " + name
-            return web.Response(text=text)
-        except Exception as ex:
-            print('error')
-            print(str(ex))
-            print(traceback.format_exc())
-            return web.Response(text='error')
-
     async def upload(self, request):
         try:
             reader = await request.multipart()
@@ -33,7 +22,7 @@ class Handler:
             print('error')
             print(str(ex))
             print(traceback.format_exc())
-            return web.Response(text='error')
+            return web.Response(text='Internal server error', status=500)
 
     async def download(self, request):
         hash = request.match_info.get('hash', None)
@@ -44,7 +33,7 @@ class Handler:
             response.headers.add('filename', 'file')
             return response
         else:
-            return web.Response(text='File not found')
+            return web.Response(text='File not found', status=500)
 
     async def remove(self, request):
         try:
@@ -52,22 +41,20 @@ class Handler:
             hash = data['hash']
             helper = fu.FileHelper()
             res = helper.remove_file_by_hash(hash)
-            text = 'File removed'
             if res:
-                text = res
-            return web.Response(text=text)
+                return web.Response(text=res, status=500)
+            return web.Response(text='File removed')
         except Exception as ex:
             print('error')
             print(str(ex))
             print(traceback.format_exc())
-            return web.Response(text='error')
+            return web.Response(text='Internal server error', status=500)
 
 
 def run_service():
     handler = Handler()
     app = web.Application()
-    app.add_routes([web.get('/', handler.handle),
-                    web.post('/upload', handler.upload),
+    app.add_routes([web.post('/upload', handler.upload),
                     web.get('/download({hash})', handler.download),
                     web.post('/remove', handler.remove)])
     web.run_app(app, port=8081)
